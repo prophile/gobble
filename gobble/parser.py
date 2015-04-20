@@ -14,13 +14,13 @@ class Parser:
     def __init__(self, parse):
         self.parse = parse
 
-    def execute(self, input):
-        result, final_index = self.parse(input, 0)
-        if final_index != len(input):
-            location = compute_location(input, final_index)
+    def execute(self, source):
+        result, final_index = self.parse(source, 0)
+        if final_index != len(source):
+            location = compute_location(source, final_index)
             raise ParseError(location,
                              'Partial parse, residue is '
-                             '{0!r}'.format(input[final_index:]))
+                             '{0!r}'.format(source[final_index:]))
         return result
 
     def __repr__(self):
@@ -72,8 +72,8 @@ def parser(fn):
             while True:
                 try:
                     subvalue, index = subexpression.parse(source, index)
-                except ParseError as error:
-                    subexpression = iterator.throw(error)
+                except ParseError as parse_error:
+                    subexpression = iterator.throw(parse_error)
                 else:
                     subexpression = iterator.send(subvalue)
         except StopIteration as exception:
@@ -116,7 +116,7 @@ def either(a, b):
 def then(a, b):
     @parser
     def parse_sequence():
-        first = yield a
+        yield a
         second = yield b
         return second
     parse_sequence.parse.__name__ = a.parse.__name__ + ' ' + b.parse.__name__
@@ -126,7 +126,7 @@ def followed_by(a, b):
     @parser
     def parse_sequence():
         first = yield a
-        second = yield b
+        yield b
         return first
     parse_sequence.parse.__name__ = a.parse.__name__ + ' ' + b.parse.__name__
     return parse_sequence
