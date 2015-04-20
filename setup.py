@@ -6,7 +6,7 @@ with open('README.rst') as f:
 
 
 setup(name='gobble',
-      version='0.1.0',
+      version='0.1.1',
       packages=find_packages(),
       description='A simpler parsing framework',
       long_description=long_description,
