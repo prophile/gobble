@@ -109,7 +109,7 @@ def either(a, b):
             return (yield a)
         except ParseError:
             return (yield b)
-    parse_either.parse.__name__ = '({} | {})'.format(a.parse.__name__,
+    parse_either.parse.__name__ = '({} / {})'.format(a.parse.__name__,
                                                      b.parse.__name__)
     return parse_either
 
