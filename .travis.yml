@@ -9,4 +9,4 @@ install:
     - pip install prospector
 script:
     - python setup.py nosetests
-    - prospector -s veryhigh --doc-warnings gobble
+    - prospector -s medium --doc-warnings gobble
