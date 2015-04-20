@@ -88,6 +88,20 @@ def error(message):
     parse_error.parse.__name__ = '<error>'
     return parse_error
 
+def literal(value, normalize=lambda x: x):
+    normalized_value = normalize(value)
+    # We could do this with @parser, but this way is more efficient
+    def parse_literal(source, index):
+        next_index = index + len(value)
+        match = source[index:next_index]
+        if normalize(match) == normalized_value:
+            return value, next_index
+        else:
+            loc = compute_location(source, index)
+            raise ParseError(loc, "Expected {0!r}".format(value))
+    parse_literal.__name__ = repr(value)
+    return Parser(parse_literal)
+
 def either(a, b):
     @parser
     def parse_either():

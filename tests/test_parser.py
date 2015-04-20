@@ -1,5 +1,5 @@
 from gobble.parser import Parser, ParseError, dot, character, location, \
-                          either, then, followed_by, parser
+                          either, then, followed_by, parser, literal
 from nose.tools import eq_, raises
 
 def test_dot():
@@ -78,3 +78,17 @@ def test_optional_no_match():
 
 def test_optional_default_none():
     eq_(dot.option().execute(''), None)
+
+def test_literal():
+    eq_(literal('horse').execute('horse'), 'horse')
+
+@raises(ParseError)
+def test_literal_fail():
+    literal('horse').execute('')
+
+@raises(ParseError)
+def test_literal_fail_partial():
+    literal('horse').execute('hors')
+
+def test_literal_norm():
+    eq_(literal('horse', normalize=lambda x: x.lower()).execute('HorSE'), 'horse')
