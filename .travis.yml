@@ -13,6 +13,7 @@ script:
 deploy:
   provider: pypi
   user: alynn
+  distributions: "sdist bdist_wheel"
   password:
     secure: BeWyDIuiaMA+OSPCmmq91++zArCs7OUmdjIlPXUJcXqabDYL1E2PvbMe3pd0wZCGPF8DPk/Mqx8kRR4qVXfbWtuxyC9ZkYZt8jR8Z48v8uklaC55X3s5Z295PPlTln+9tsQ2rjn+qorJuTTFaA6/uoEDU43FUP2G+e9/LbRIcd4=
   on:
