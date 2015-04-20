@@ -33,3 +33,6 @@ def test_eof():
 
 def test_empty():
     eq_(compute_location('', 0), (1, 1))
+
+def test_list():
+    eq_(compute_location([1, 2, 3, 4, 5], 3), (1, 3))
