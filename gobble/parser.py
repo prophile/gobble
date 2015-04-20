@@ -141,7 +141,7 @@ def optional(a, default=None):
     parse_option.parse.__name__ = '({})?'.format(a.parse.__name__)
     return parse_option
 
-def _parse_index(source, index):
+def _parse_index(_, index):
     return index, index
 _parse_index.__name__ = '<index>'
 _index = Parser(_parse_index)
