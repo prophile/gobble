@@ -42,7 +42,7 @@ Optional elements:
     @parser
     def natural():
         sign = yield character('-+').option('+')
-        factor = {'-': -1, '+': 1}
+        factor = {'-': -1, '+': 1}[sign]
         value = yield natural
         return value * factor
 
