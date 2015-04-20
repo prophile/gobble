@@ -63,6 +63,9 @@ def test_star():
 def test_star_empty():
     eq_(dot.star.execute(''), [])
 
+def test_star_star():
+    eq_(dot.star.star.execute('1'), [['1'], []])
+
 def test_plus():
     eq_(dot.plus.execute('123'), ['1', '2', '3'])
 

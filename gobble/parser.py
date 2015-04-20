@@ -141,13 +141,25 @@ def optional(a, default=None):
     parse_option.parse.__name__ = '({})?'.format(a.parse.__name__)
     return parse_option
 
+def _parse_index(source, index):
+    return index, index
+_parse_index.__name__ = '<index>'
+_index = Parser(_parse_index)
+
 def _replicated(a, operator, min_count):
     @parser
     def parse_replicated():
         matches = []
         try:
             while True:
-                matches.append((yield a))
+                idx = yield _index
+                submatch = yield a
+                idx_prime = yield _index
+                matches.append(submatch)
+                if idx_prime == idx:
+                    # `a` accepts epsilon, this will end up matching forever
+                    # instead assume that's not what the user wants
+                    break
         except ParseError:
             pass
         if len(matches) >= min_count:
