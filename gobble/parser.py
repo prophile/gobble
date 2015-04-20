@@ -60,7 +60,7 @@ def character(character):
             raise ParseError(compute_location(source, index),
                              'Unexpected character, expected one of '
                              '{0!r}'.format(character))
-    parse_character.__name__ = '[{}]'.format(character)
+    parse_character.__name__ = '[{}]'.format(repr(character)[1:-1])
     return Parser(parse_character)
 
 def parser(fn):
