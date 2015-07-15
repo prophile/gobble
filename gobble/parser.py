@@ -4,6 +4,7 @@ import functools
 from .location import compute_location
 
 class ParseError(ValueError):
+
     """Exception class used to indicate actual errors in parsing.
     
     Takes a location for more helpful error messages.
@@ -21,6 +22,7 @@ class ParseError(ValueError):
         self.location = location
 
 class Parser:
+
     """Single parser type.
     
     A wrapper around a function from (source, index) to either raising a `ParseError` or
