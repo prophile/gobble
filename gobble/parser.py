@@ -1,20 +1,39 @@
+"""Main parser implementation."""
+
 import functools
 from .location import compute_location
 
 class ParseError(ValueError):
+    """Exception class used to indicate actual errors in parsing. Takes a location
+    for more helpful error messages.
+    """
     __slots__ = ('location',)
 
     def __init__(self, location, message):
+        """Standard constructor. `location` is a (line, column) tuple; `message` takes
+        its usual meaning for exception classes.
+        """
         super().__init__('{}:{}: {}'.format(location[0], location[1], message))
         self.location = location
 
 class Parser:
+    """Single parser type. A wrapper around a function from (source, index) to either
+    raising a `ParseError` or returning (value, new_index).
+    
+    Highly composable.
+    """
     __slots__ = ('parse',)
 
     def __init__(self, parse):
+        """Construct directly with underlying parser function. You shouldn't need to
+        do this much.
+        """
         self.parse = parse
 
     def execute(self, source):
+        """Run on source, forbidding residue. That is, if the parser does not consume the
+        entire input, it is an error.
+        """
         result, final_index = self.parse(source, 0)
         if final_index != len(source):
             location = compute_location(source, final_index)
@@ -24,15 +43,18 @@ class Parser:
         return result
 
     def __repr__(self):
+        """Pretty-printed representation for debugging."""
         return '{}<{}>'.format(self.__class__.__name__,
                                self.parse.__name__)
 
     @property
     def plus(self):
+        """One-or-more."""
         return _replicated(self, '+', 1)
 
     @property
     def star(self):
+        """Zero-or-more."""
         return _replicated(self, '*', 0)
 
 def _parse_location(source, index):
@@ -49,6 +71,7 @@ _parse_dot.__name__ = '.'
 dot = Parser(_parse_dot)
 
 def character(character):
+    """Parser which accepts any character within the Container `character`."""
     def parse_character(source, index):
         if index == len(source):
             raise ParseError(compute_location(source, index),
@@ -64,6 +87,13 @@ def character(character):
     return Parser(parse_character)
 
 def parser(fn):
+    """Wrapper for creating parsers from generator expressions.
+    
+    The function should be nullary; yield <parser> within it to parse from
+    <parser>, which returns whatever the parser evaluated, or throws a
+    ParseError. Letting ParseErrors escape is probably what you want in most
+    cases.
+    """
     @functools.wraps(fn)
     def parse_group(source, index):
         iterator = fn()
@@ -81,6 +111,7 @@ def parser(fn):
     return Parser(parse_group)
 
 def error(message):
+    """Parser which always errors out with the same message."""
     @parser
     def parse_error():
         loc = yield location
@@ -89,6 +120,13 @@ def error(message):
     return parse_error
 
 def literal(value, normalize=lambda x: x):
+    """Parser which accepts exactly a literal value. Pass `normalize` for a
+    normalization stage before comparison; by default it's the identity
+    function but, for instance, lambda x: x.lower() gives you case-insensitive
+    matching.
+    
+    Returns `value` on a successful match.
+    """
     normalized_value = normalize(value)
     # We could do this with @parser, but this way is more efficient
     def parse_literal(source, index):
@@ -103,6 +141,10 @@ def literal(value, normalize=lambda x: x):
     return Parser(parse_literal)
 
 def either(a, b):
+    """Alternation. Tries a; if that raises a ParseError tries b.
+    
+    You can also access this as parser | parser.
+    """
     @parser
     def parse_either():
         try:
@@ -114,6 +156,12 @@ def either(a, b):
     return parse_either
 
 def then(a, b):
+    """Right-sequencing. Parses a, then parses b, then returns from b
+    discarding the result from a.
+    
+    You can also access this as parser >> parser. The arrows point to
+    the result.
+    """
     @parser
     def parse_sequence():
         yield a
@@ -123,6 +171,12 @@ def then(a, b):
     return parse_sequence
 
 def followed_by(a, b):
+    """Left-sequencing. Parses a, then parses b, then returns from a
+    discarding the result from b.
+    
+    You can also access this as parser << parser. The arrows point to
+    the result.
+    """
     @parser
     def parse_sequence():
         first = yield a
@@ -132,6 +186,9 @@ def followed_by(a, b):
     return parse_sequence
 
 def optional(a, default=None):
+    """Optional a. Parses a; if that's successful returns from there; otherwise,
+    returns the value of `default`.
+    """
     @parser
     def parse_option():
         try:
