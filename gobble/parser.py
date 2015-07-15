@@ -8,6 +8,7 @@ class ParseError(ValueError):
     
     Takes a location for more helpful error messages.
     """
+
     __slots__ = ('location',)
 
     def __init__(self, location, message):
@@ -27,6 +28,7 @@ class Parser:
     
     Highly composable.
     """
+
     __slots__ = ('parse',)
 
     def __init__(self, parse):
@@ -80,7 +82,8 @@ dot = Parser(_parse_dot)
 def character(character):
     """Parse from a character range.
     
-    Accepts any character within the Container `character`, returning it."""
+    Accepts any character within the Container `character`, returning it.
+    """
     def parse_character(source, index):
         if index == len(source):
             raise ParseError(compute_location(source, index),
