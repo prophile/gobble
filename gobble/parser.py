@@ -4,35 +4,42 @@ import functools
 from .location import compute_location
 
 class ParseError(ValueError):
-    """Exception class used to indicate actual errors in parsing. Takes a location
-    for more helpful error messages.
+    """Exception class used to indicate actual errors in parsing.
+    
+    Takes a location for more helpful error messages.
     """
     __slots__ = ('location',)
 
     def __init__(self, location, message):
-        """Standard constructor. `location` is a (line, column) tuple; `message` takes
-        its usual meaning for exception classes.
+        """Standard constructor.
+        
+        `location` is a (line, column) tuple; `message` takes its usual meaning for
+        exception classes.
         """
         super().__init__('{}:{}: {}'.format(location[0], location[1], message))
         self.location = location
 
 class Parser:
-    """Single parser type. A wrapper around a function from (source, index) to either
-    raising a `ParseError` or returning (value, new_index).
+    """Single parser type.
+    
+    A wrapper around a function from (source, index) to either raising a `ParseError` or
+    returning (value, new_index).
     
     Highly composable.
     """
     __slots__ = ('parse',)
 
     def __init__(self, parse):
-        """Construct directly with underlying parser function. You shouldn't need to
-        do this much.
+        """Construct directly with underlying parser function.
+        
+        You shouldn't need to do this much.
         """
         self.parse = parse
 
     def execute(self, source):
-        """Run on source, forbidding residue. That is, if the parser does not consume the
-        entire input, it is an error.
+        """Run on source, forbidding residue.
+        
+        That is, if the parser does not consume the entire input, it is an error.
         """
         result, final_index = self.parse(source, 0)
         if final_index != len(source):
@@ -71,7 +78,9 @@ _parse_dot.__name__ = '.'
 dot = Parser(_parse_dot)
 
 def character(character):
-    """Parser which accepts any character within the Container `character`."""
+    """Parse from a character range.
+    
+    Accepts any character within the Container `character`, returning it."""
     def parse_character(source, index):
         if index == len(source):
             raise ParseError(compute_location(source, index),
@@ -120,10 +129,11 @@ def error(message):
     return parse_error
 
 def literal(value, normalize=lambda x: x):
-    """Parser which accepts exactly a literal value. Pass `normalize` for a
-    normalization stage before comparison; by default it's the identity
-    function but, for instance, lambda x: x.lower() gives you case-insensitive
-    matching.
+    """Parser which accepts exactly a literal value.
+    
+    Pass `normalize` for a normalization stage before comparison; by default
+    it's the identity function but, for instance, lambda x: x.lower() gives
+    you case-insensitive matching.
     
     Returns `value` on a successful match.
     """
@@ -141,7 +151,9 @@ def literal(value, normalize=lambda x: x):
     return Parser(parse_literal)
 
 def either(a, b):
-    """Alternation. Tries a; if that raises a ParseError tries b.
+    """Alternation.
+    
+    Tries a; if that raises a ParseError tries b.
     
     You can also access this as parser | parser.
     """
@@ -156,8 +168,9 @@ def either(a, b):
     return parse_either
 
 def then(a, b):
-    """Right-sequencing. Parses a, then parses b, then returns from b
-    discarding the result from a.
+    """Right-sequencing.
+    
+    Parses a, then parses b, then returns from b discarding the result from a.
     
     You can also access this as parser >> parser. The arrows point to
     the result.
@@ -171,8 +184,9 @@ def then(a, b):
     return parse_sequence
 
 def followed_by(a, b):
-    """Left-sequencing. Parses a, then parses b, then returns from a
-    discarding the result from b.
+    """Left-sequencing.
+    
+    Parses a, then parses b, then returns from a discarding the result from b.
     
     You can also access this as parser << parser. The arrows point to
     the result.
@@ -186,8 +200,10 @@ def followed_by(a, b):
     return parse_sequence
 
 def optional(a, default=None):
-    """Optional a. Parses a; if that's successful returns from there; otherwise,
-    returns the value of `default`.
+    """Optional a.
+    
+    Parses a; if that's successful returns from there; otherwise, returns the value
+    of `default`.
     """
     @parser
     def parse_option():
